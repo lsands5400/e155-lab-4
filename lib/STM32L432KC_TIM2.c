@@ -17,29 +17,29 @@
 #define TIM2_OR1    ((TIM2_TypeDef *) (TIM2_BASE + 0x50))
 
 
-void initTIM2(TIM2_TypeDef * TIM2) {
+void initTIM2(TIM2_TypeDef * tim) {
 
     // Turn on clock for timer from RCC
     // LSE is the clock input on the TIM2_ETR pin
-    * TIM2_OR1 |= (1<<1); // TODO: Do I only need the TIMx_CLK?
+    TIM2->OR1 |= (1<<1); // TODO: Do I only need the TIMx_CLK?
 
     // Select correct clock source in TIM control
 
     // Disable slave mode
-    * TIM2_SMCR &= ~(1<<0);
-    * TIM2_SMCR &= ~(1<<1);
-    * TIM2_SMCR &= ~(1<<2);
+    TIM2->SMCR &= ~(1<<0);
+    TIM2->SMCR &= ~(1<<1);
+    TIM2->SMCR &= ~(1<<2);
 
     // Configure counter
 
     // Enable proper registers
     // Prescaler
     // Enable Auto-reload
-    * TIM2_CR1 |= (1<<7);
+    TIM2->CR1 |= (1<<7);
     // Enable Counter
-    * TIM2_CR1 |= (1<<0);
+    TIM2->CR1 |= (1<<0);
 }
 
-void delay_millis(TIM2_TypeDef * TIM2, uint32_t ms) {
-
+void delay_millis(TIM2_TypeDef * tim, uint32_t ms) {
+    // TODO: How do I do the delay?
 }

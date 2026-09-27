@@ -11,8 +11,10 @@ int main(void) {
 	
     for (size_t i; i<= sizeof(notes); i++) {
         // set the PWM to the duration 
-
+        TIM2->
+        
         // set the prescaler to the frequency
+        TIM2->PSC = 
     }
 	
 }

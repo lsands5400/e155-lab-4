@@ -1,0 +1,6 @@
+1. How do I assign a lot of bits at once? I.E. How can I send 2+ bit values without 
+indiviudal bit changing?
+
+2. How do I create the delay/what am I creating it for?
+
+3. Do I wait for the PLL to be unlocked?

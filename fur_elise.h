@@ -1,4 +1,9 @@
 
+#ifndef FURELISE_H
+#define FURELISE_H
+
+#include <stdint.h>
+
 // Pitch in Hz, duration in ms
 const int notes[][2] = {
 {659,	125},
@@ -110,3 +115,5 @@ const int notes[][2] = {
 {494,	125},
 {440,	500},
 {  0,	0}};
+
+#endif
