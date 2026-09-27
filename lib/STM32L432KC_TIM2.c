@@ -8,14 +8,6 @@
 
 // Base addresses for TIM2 ports
 #define TIM2_BASE (0x400003FF)
-// Define addresses to send data to
-#define TIM2_CR1    ((TIM2_TypeDef *) (TIM2_BASE + 0x00))
-#define TIM2_SMCR   ((TIM2_TypeDef *) (TIM2_BASE + 0x08))
-#define TIM2_CNT    ((TIM2_TypeDef *) (TIM2_BASE + 0x24))
-#define TIM2_PSC    ((TIM2_TypeDef *) (TIM2_BASE + 0x28))
-#define TIM2_ARR    ((TIM2_TypeDef *) (TIM2_BASE + 0x2C))
-#define TIM2_OR1    ((TIM2_TypeDef *) (TIM2_BASE + 0x50))
-
 
 void initTIM2(TIM2_TypeDef * tim) {
 
@@ -43,3 +35,12 @@ void initTIM2(TIM2_TypeDef * tim) {
 void delay_millis(TIM2_TypeDef * tim, uint32_t ms) {
     // TODO: How do I do the delay?
 }
+
+
+// // Define addresses to send data to
+// #define CR1    ((TIM2_TypeDef *) (TIM2_BASE + 0x00))
+// #define SMCR   ((TIM2_TypeDef *) (TIM2_BASE + 0x08))
+// #define CNT    ((TIM2_TypeDef *) (TIM2_BASE + 0x24))
+// #define PSC    ((TIM2_TypeDef *) (TIM2_BASE + 0x28))
+// #define ARR    ((TIM2_TypeDef *) (TIM2_BASE + 0x2C))
+// #define OR1    ((TIM2_TypeDef *) (TIM2_BASE + 0x50))

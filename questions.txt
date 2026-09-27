@@ -1,6 +1,10 @@
 1. How do I assign a lot of bits at once? I.E. How can I send 2+ bit values without 
 indiviudal bit changing?
+    Answer: RCC->CFGR |= (0b11 << 0); Wait this is for if they are both 1's. 
+    What if they're not both 1's?
 
 2. How do I create the delay/what am I creating it for?
 
-3. Do I wait for the PLL to be unlocked?
+3. How do I wait for the PLL to be unlocked?
+
+4. How does the GPIO library define the address offsets?
