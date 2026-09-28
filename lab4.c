@@ -6,6 +6,7 @@
 #include "fur_elise.h"
 #include "STM32L432KC_TIM2.h"
 #include "STM32L432KC_TIM16.h"
+#include "STM32L432KC_RCC.h"
 #include <stdint.h>
 
 void PWM(TIM2_TypeDef *tim, int duration) {
@@ -62,8 +63,11 @@ void PWM(TIM2_TypeDef *tim, int duration) {
 
 }
 
-void delay_millis(TIM2_TypeDef * tim, uint32_t ms) {
-    
+void delay_millis(TIM16_TypeDef * tim, uint32_t ms) {
+    size_t count = 0b11111010000; // 2000 // TODO: Should I just hardcode this? And should I make it a #define variable?
+    size_t newCount;
+    newCount = ms/31.25 * count;
+    tim->CNT |= (newCount << 0);
 }
 
 
@@ -77,16 +81,11 @@ int main(void) {
     initTIM16(tim16);
 	
     for (size_t i; i<= sizeof(notes); i++) {
-        
-        // set the PWM to the duration 
         int pitch = notes[i][1];
         int duration = notes[i][0];
 
         PWM(tim2, pitch);
         delay_millis(tim16, duration);
-
-        // set the prescaler to the frequency
-        TIM2->PSC |= (01111111111111 << 0);
     }
 	
 }

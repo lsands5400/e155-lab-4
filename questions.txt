@@ -16,10 +16,13 @@ indiviudal bit changing?
 
 5. How do I select the correct clock source for the timers? I can't find anything 
 about the internal clocks for the timers.
-    Answer: 
+    Answer: Enable bus in RCC for the timer
 
 6. How do I disable slave mode for TIM16? There's no SMCR.
-    Answer:
+    Answer: N/A
 
 7. Should I be doing PWM/generating square waves with both of my timers?
     Answer: 
+
+8. How should I handle conversion between decimal and binary?
+    Answer:
