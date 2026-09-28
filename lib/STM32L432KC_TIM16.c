@@ -1,7 +1,8 @@
 // Lindsey Sands
 // lsands@g.hmc.edu
 // 09-24-2026
-// This is the header file for TIM2
+// This is the header file for the SysTick struct, 
+// giving all the addresses for the ports
 
 #ifndef STM32L4_TIM2_H
 #define STM32L4_TIM2_H

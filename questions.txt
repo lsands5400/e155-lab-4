@@ -4,7 +4,12 @@ indiviudal bit changing?
     What if they're not both 1's?
 
 2. How do I create the delay/what am I creating it for?
+    Answer: I need two timers, not just one.
 
 3. How do I wait for the PLL to be unlocked?
+    Answer: While loop
 
 4. How does the GPIO library define the address offsets?
+    Answer: its because the struct is being defined at the address of the pointer, 
+    so it allocates for each variable accordingly. I have to add reserved for ones 
+    that are skip spaces

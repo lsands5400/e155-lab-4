@@ -13,9 +13,9 @@ void configurePLL() {
     // Turn off PLL
     RCC->CR &= ~(1<<24);
     
-    // TODO: Wait till PLL is unlocked (e.g., off)
+    // Wait till PLL is unlocked (e.g., off)
     // how do I wait? wait until bit 25 == 0
-    RCC->CR == ~(1<<25);
+    while (!(RCC->CR >> 25));
 
     // Load configuration
     // Set PLL SRC to MSI
@@ -42,8 +42,8 @@ void configurePLL() {
     // Enable PLL
     RCC->CR |= (1<<24);
     
-    // TODO: Wait until PLL is locked
-    
+    // Wait until PLL is locked
+    while (RCC->CR >> 25);
 }
 
 void configureClock(){
