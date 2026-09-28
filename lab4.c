@@ -5,9 +5,10 @@
 
 #include "fur_elise.h"
 #include "STM32L432KC_TIM2.h"
+#include "STM32L432KC_TIM16.h"
 #include <stdint.h>
 
-void PWM(int duration) {
+void PWM(TIM2_TypeDef *tim, int duration) {
 
     // 1. Select the active input: TIMx_CCR1 must be linked to the TI1 input, so write the CC1S
     // bits to 01 in the TIMx_CCMR1 register. As soon as CC1S becomes different from 00,
@@ -61,14 +62,28 @@ void PWM(int duration) {
 
 }
 
+void delay_millis(TIM2_TypeDef * tim, uint32_t ms) {
+    
+}
+
+
 int main(void) {
+
+    TIM2_TypeDef *tim2;
+    TIM16_TypeDef *tim16;
+
+    // initialize timers
+    initTIM2(tim2);
+    initTIM16(tim16);
 	
     for (size_t i; i<= sizeof(notes); i++) {
+        
         // set the PWM to the duration 
         int pitch = notes[i][1];
         int duration = notes[i][0];
 
-        PWM(pitch);
+        PWM(tim2, pitch);
+        delay_millis(tim16, duration);
 
         // set the prescaler to the frequency
         TIM2->PSC |= (01111111111111 << 0);

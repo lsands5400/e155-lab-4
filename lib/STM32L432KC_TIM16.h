@@ -42,8 +42,6 @@ volatile uint32_t OR2;     // offset 0x60 -- Option Register 2
 
 #define TIM16 ((TIM16_TypeDef *) TIM16_BASE)
 
-void initTIM2(TIM16_TypeDef * tim);
-
-void delay_millis(TIM16_TypeDef * tim, uint32_t ms);
+void initTIM16(TIM16_TypeDef * tim);
 
 #endif

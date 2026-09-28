@@ -13,3 +13,13 @@ indiviudal bit changing?
     Answer: its because the struct is being defined at the address of the pointer, 
     so it allocates for each variable accordingly. I have to add reserved for ones 
     that are skip spaces
+
+5. How do I select the correct clock source for the timers? I can't find anything 
+about the internal clocks for the timers.
+    Answer: 
+
+6. How do I disable slave mode for TIM16? There's no SMCR.
+    Answer:
+
+7. Should I be doing PWM/generating square waves with both of my timers?
+    Answer: 

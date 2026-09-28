@@ -44,6 +44,4 @@ volatile uint32_t OR2;     // offset 0x60 -- Option Register 2
 
 void initTIM2(TIM2_TypeDef * tim);
 
-void delay_millis(TIM2_TypeDef * tim, uint32_t ms);
-
 #endif
