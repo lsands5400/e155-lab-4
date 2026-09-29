@@ -12,7 +12,7 @@
 void initTIM16(TIM16_TypeDef * tim) {
 
     // Turn on bus for timer from RCC
-    RCC->APB2ENR |= (1 << 17); // Enable TIM16
+    RCC->APB2ENR |= (1 << 0); // Enable TIM16
     // Configure counter
 
     // Enable proper registers
