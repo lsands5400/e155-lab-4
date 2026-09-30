@@ -7,12 +7,15 @@
 #include "STM32L432KC_TIM2.h"
 #include "STM32L432KC_TIM16.h"
 #include "STM32L432KC_RCC.h"
+#include "STM32L432KC_GPIO.h"
+#include "STM32L432KC_FLASH.h"
+
 #include <stdint.h>
 #include <math.h>
 
 #define PSC32 1250; // Prescale value for 32 ms duration
 #define PSC200 50; // Prescale value for 200 Hz frequency
-#define OUTPUT_PIN          11
+#define OUTPUT_PIN          6
 
 void setPitch(int pitch) {
     // Set new prescaler value
@@ -68,22 +71,20 @@ void delay_millis(uint32_t ms) {
 
 int main(void) {
 
-    configurePLL();
-
-    // Enable clock for GPIOB
-    RCC->AHB2ENR |= (1 << 1);
+    // Enable clock for GPIOA
+    RCC->AHB2ENR |= (1 << 0);
 
     // Set OUTPUT_PIN as output
-    pinMode(OUTPUT_PIN, GPIO_ALT);
-
-    GPIO->AFRH |= (0b0001 << 12);
+    pinMode(OUTPUT_PIN, GPIO_OUTPUT);
 
     // initialize timers
     initTIM2();
     initTIM16();
 
     // Enable UIF 
-    TIM2->CR1 |= (1 << 11);
+    TIM16->CR1 |= (1 << 11);
+    // clear SR 
+    TIM16->SR &= 0;
 
     TIM2->ARR = 0;
 
@@ -101,21 +102,19 @@ int main(void) {
         int pitch = notes[i][0];
         int duration = notes[i][1];
 
-        // Set the pitch
-        setPitch(pitch);
-
-        // Start the clock for the duration
-        delay_millis(duration);
-
-        // clear SR 
+        // clear UIF 
         TIM16->SR &= ~(1 << 0);
-        
-        //// Wait for the auto-reload registers to read the right values
-        //while((((tim16->ARR >> 0) & 1) == 0) & (((tim2->ARR >> 0) & 1) == 0)); // TODO: how do I write this?
 
-        // Wait for UEV to turn on
-        while(((TIM16->SR >> 0) & 1) == 0);
+        while(((TIM16->SR >> 0) & 1) == 0){
+          // Set the pitch
+          setPitch(pitch);
 
+          // Start the clock for the duration
+          delay_millis(duration);
+
+          togglePin(OUTPUT_PIN);
+        }
+  
     }
 
 }
