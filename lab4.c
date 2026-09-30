@@ -12,13 +12,13 @@
 
 #define PSC32 1250; // Prescale value for 32 ms duration
 #define PSC200 50; // Prescale value for 200 Hz frequency
-#define OUTPUT_PIN           6
+#define OUTPUT_PIN          11
 
 void setPitch(int pitch) {
     // Set new prescaler value
-    double prescaler = ((double) pitch)/200.0 * PSC200;
-    prescaler = round(prescaler);
-    TIM2->PSC = (prescaler);
+    uint32_t prescaler = ((double) pitch)/200.0 * PSC200;
+    TIM2->PSC |= (prescaler << 0);
+    TIM2->ARR |= (prescaler << 16);
 }
 
 void PWM(void) {
@@ -58,12 +58,11 @@ void PWM(void) {
 }
 
 void delay_millis(uint32_t ms) {
-  
     // Set new prescaler value
     uint32_t prescaler;
     prescaler = ms/31.25 * PSC32;
     TIM16->PSC |= (prescaler << 0);
-
+    TIM16->ARR |= (prescaler << 16);
 }
 
 
@@ -74,8 +73,10 @@ int main(void) {
     // Enable clock for GPIOB
     RCC->AHB2ENR |= (1 << 1);
 
-    // Set LED_PIN as output
-    pinMode(OUTPUT_PIN, GPIO_OUTPUT);
+    // Set OUTPUT_PIN as output
+    pinMode(OUTPUT_PIN, GPIO_ALT);
+
+    GPIO->AFRH |= (0b0001 << 12);
 
     // initialize timers
     initTIM2();
@@ -106,7 +107,8 @@ int main(void) {
         // Start the clock for the duration
         delay_millis(duration);
 
-        togglePin(OUTPUT_PIN);
+        // clear SR 
+        TIM16->SR &= ~(1 << 0);
         
         //// Wait for the auto-reload registers to read the right values
         //while((((tim16->ARR >> 0) & 1) == 0) & (((tim2->ARR >> 0) & 1) == 0)); // TODO: how do I write this?
