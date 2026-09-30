@@ -42,6 +42,6 @@ volatile uint32_t OR2;     // offset 0x60 -- Option Register 2
 
 #define TIM2 ((TIM2_TypeDef *) TIM2_BASE)
 
-void initTIM2(TIM2_TypeDef * tim);
+void initTIM2(void);
 
 #endif

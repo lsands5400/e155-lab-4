@@ -6,8 +6,7 @@
 #include "STM32L432KC_TIM16.h"
 #include "STM32L432KC_RCC.h"
 
-void initTIM16(TIM16_TypeDef * tim) {
-
+void initTIM16(void) {
     // Turn on bus for timer from RCC
     RCC->APB2ENR |= (1 << 17); // Enable TIM16
     // Configure counter

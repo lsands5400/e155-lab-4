@@ -12,15 +12,16 @@
 
 #define PSC32 1250; // Prescale value for 32 ms duration
 #define PSC200 50; // Prescale value for 200 Hz frequency
+#define OUTPUT_PIN           6
 
-void setPitch(TIM2_TypeDef *tim, int pitch) {
+void setPitch(int pitch) {
     // Set new prescaler value
     double prescaler = ((double) pitch)/200.0 * PSC200;
     prescaler = round(prescaler);
     TIM2->PSC = (prescaler);
 }
 
-void PWM(TIM2_TypeDef *tim) {
+void PWM(void) {
 
     // 1. Select the active input for TIMx_CCR1: write the CC1S bits to 01 in the TIMx_CCMR1
     // register (TI1 selected)
@@ -56,7 +57,7 @@ void PWM(TIM2_TypeDef *tim) {
     TIM2->CCER |= (1 << 4);
 }
 
-void delay_millis(TIM16_TypeDef * tim, uint32_t ms) {
+void delay_millis(uint32_t ms) {
   
     // Set new prescaler value
     uint32_t prescaler;
@@ -70,36 +71,48 @@ int main(void) {
 
     configurePLL();
 
-    TIM2_TypeDef *tim2;
-    TIM16_TypeDef *tim16;
+    // Enable clock for GPIOB
+    RCC->AHB2ENR |= (1 << 1);
+
+    // Set LED_PIN as output
+    pinMode(OUTPUT_PIN, GPIO_OUTPUT);
 
     // initialize timers
-    initTIM2(tim2);
-    initTIM16(tim16);
+    initTIM2();
+    initTIM16();
+
+    // Enable UIF 
+    TIM2->CR1 |= (1 << 11);
+
+    TIM2->ARR = 0;
 
     // Set initial pitch to 0
-    setPitch(tim2, 0);
+    //setPitch(0);
 
-    // Start PWM
-    PWM(tim2);
+    //delay_millis(10);
+
+    // Start PWM for TIM2
+    PWM();
   
     // Start song
-    for (uint32_t i = 0; i < sizeof(notes); i++) {
+    for (uint32_t i = 0; i < 109; i++) {
 
         int pitch = notes[i][0];
         int duration = notes[i][1];
 
         // Set the pitch
-        setPitch(tim2, pitch);
+        setPitch(pitch);
 
         // Start the clock for the duration
-        delay_millis(tim16, duration);
+        delay_millis(duration);
+
+        togglePin(OUTPUT_PIN);
         
         //// Wait for the auto-reload registers to read the right values
         //while((((tim16->ARR >> 0) & 1) == 0) & (((tim2->ARR >> 0) & 1) == 0)); // TODO: how do I write this?
 
         // Wait for UEV to turn on
-        while(((tim16->CNT >> 31) & 1) == 0);
+        while(((TIM16->SR >> 0) & 1) == 0);
 
     }
 

@@ -6,8 +6,7 @@
 #include "STM32L432KC_TIM2.h"
 #include "STM32L432KC_RCC.h"
 
-void initTIM2(TIM2_TypeDef * tim) {
-
+void initTIM2(void) {
     // Turn on bus for timer from RCC
     RCC->APB1ENR1 |= (1 << 0); // Enable TIM2
     
