@@ -11,7 +11,7 @@ void configurePLL() {
     // Use MSI as PLLSRC
 
     // Turn off PLL
-    RCC->CR &= ~(1<<24);
+    RCC->CR &= ~(1 << 24);
     
     // Wait till PLL is unlocked (e.g., off)
     // how do I wait? wait until bit 25 == 0

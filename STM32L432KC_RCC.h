@@ -13,7 +13,7 @@
 #define __IO volatile
 
 // Base addresses
-#define RCC_BASE (0x40021000UL) // base address of RCC
+#define RCC_BASE (0x40021000) // base address of RCC
 
 // PLL
 #define PLLSRC_HSI 0

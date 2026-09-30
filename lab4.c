@@ -6,9 +6,21 @@
 #include "fur_elise.h"
 #include "STM32L432KC_TIM2.h"
 #include "STM32L432KC_TIM16.h"
+#include "STM32L432KC_RCC.h"
 #include <stdint.h>
+#include <math.h>
 
-void PWM(TIM2_TypeDef *tim, int duration) {
+#define PSC32 1250; // Prescale value for 32 ms duration
+#define PSC200 50; // Prescale value for 200 Hz frequency
+
+void setPitch(TIM2_TypeDef *tim, int pitch) {
+    // Set new prescaler value
+    double prescaler = ((double) pitch)/200.0 * PSC200;
+    prescaler = round(prescaler);
+    TIM2->PSC = (prescaler);
+}
+
+void PWM(TIM2_TypeDef *tim) {
 
     // 1. Select the active input for TIMx_CCR1: write the CC1S bits to 01 in the TIMx_CCMR1
     // register (TI1 selected)
@@ -45,14 +57,18 @@ void PWM(TIM2_TypeDef *tim, int duration) {
 }
 
 void delay_millis(TIM16_TypeDef * tim, uint32_t ms) {
-    uint32_t count = 0b11111010000; // 2000 // TODO: Should I just hardcode this? And should I make it a #define variable?
-    uint32_t newCount;
-    newCount = ms/31.25 * count;
-    tim->CNT |= (newCount << 0);
+  
+    // Set new prescaler value
+    uint32_t prescaler;
+    prescaler = ms/31.25 * PSC32;
+    TIM16->PSC |= (prescaler << 0);
+
 }
 
 
 int main(void) {
+
+    configurePLL();
 
     TIM2_TypeDef *tim2;
     TIM16_TypeDef *tim16;
@@ -60,13 +76,31 @@ int main(void) {
     // initialize timers
     initTIM2(tim2);
     initTIM16(tim16);
-	
-    for (uint32_t i; i<= sizeof(notes); i++) {
-        int pitch = notes[i][1];
-        int duration = notes[i][0];
 
-        PWM(tim2, pitch);
+    // Set initial pitch to 0
+    setPitch(tim2, 0);
+
+    // Start PWM
+    PWM(tim2);
+  
+    // Start song
+    for (uint32_t i = 0; i < sizeof(notes); i++) {
+
+        int pitch = notes[i][0];
+        int duration = notes[i][1];
+
+        // Set the pitch
+        setPitch(tim2, pitch);
+
+        // Start the clock for the duration
         delay_millis(tim16, duration);
+        
+        //// Wait for the auto-reload registers to read the right values
+        //while((((tim16->ARR >> 0) & 1) == 0) & (((tim2->ARR >> 0) & 1) == 0)); // TODO: how do I write this?
+
+        // Wait for UEV to turn on
+        while(((tim16->CNT >> 31) & 1) == 0);
+
     }
-	
+
 }

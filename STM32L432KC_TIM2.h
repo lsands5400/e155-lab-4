@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include "STM32L432KC_GPIO.h"
 
-#define TIM2_BASE (0x400003FF)
+#define TIM2_BASE (0x40000000)
 
 typedef struct 
 {

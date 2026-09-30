@@ -15,16 +15,16 @@ void initTIM2(TIM2_TypeDef * tim) {
     RCC->APB1ENR1 |= (1 << 0); // Enable TIM2
     
     // Disable slave mode
-    TIM2->SMCR &= ~(1<<0);
-    TIM2->SMCR &= ~(1<<1);
-    TIM2->SMCR &= ~(1<<2);
+    tim->SMCR &= ~(1<<0);
+    tim->SMCR &= ~(1<<1);
+    tim->SMCR &= ~(1<<2);
 
     // Configure counter
 
     // Enable proper registers
     // Prescaler
     // Enable Auto-reload
-    TIM2->CR1 |= (1<<7);
+    tim->CR1 |= (1<<7);
     // Enable Counter
-    TIM2->CR1 |= (1<<0);
+    tim->CR1 |= (1<<0);
 }

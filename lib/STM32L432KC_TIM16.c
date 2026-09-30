@@ -18,7 +18,7 @@ void initTIM16(TIM16_TypeDef * tim) {
     // Enable proper registers
     // Prescaler
     // Enable Auto-reload
-    TIM16->CR1 |= (1 << 7);
+    tim->CR1 |= (1 << 7);
     // Enable Counter
-    TIM16->CR1 |= (1 << 0);
+    tim->CR1 |= (1 << 0);
 }

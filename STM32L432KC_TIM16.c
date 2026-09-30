@@ -6,13 +6,10 @@
 #include "STM32L432KC_TIM16.h"
 #include "STM32L432KC_RCC.h"
 
-// Base addresses for TIM16 ports
-#define TIM16_BASE (0x40014400)
-
 void initTIM16(TIM16_TypeDef * tim) {
 
     // Turn on bus for timer from RCC
-    RCC->APB2ENR |= (1 << 0); // Enable TIM16
+    RCC->APB2ENR |= (1 << 17); // Enable TIM16
     // Configure counter
 
     // Enable proper registers
