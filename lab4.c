@@ -13,15 +13,9 @@
 #include <stdint.h>
 #include <math.h>
 
-#define PSC32 1250 // Prescale value for 32 ms duration
-#define PSC200 50 // Prescale value for 200 Hz frequency
+#define ARR32 4000.0 // ARR value for 32 ms duration
+#define ARR200 50000.0 // ARR value for 200 Hz frequency
 #define OUTPUT_PIN 5 // PA5 for TIM2_CH1
-
-void setPitch(int pitch) {
-    // Set new prescaler value
-    uint32_t prescaler = ((double) pitch)/200.0 * PSC200;
-    TIM2->PSC |= (prescaler << 0);
-}
 
 void PWM(void) {
 
@@ -59,11 +53,21 @@ void PWM(void) {
     TIM2->CCER |= (1 << 4);
 }
 
+void setPitch(int pitch) {
+    // Set new ARR value
+    if (pitch == 0) {
+      TIM2->ARR &= 0;
+    } else {
+      uint32_t reload = 200.0/((double) pitch) * ARR200;
+      TIM2->ARR |= (reload << 0);
+    }
+}
+
 void delay_millis(uint32_t ms) {
-    // Set new prescaler value
-    uint32_t prescaler;
-    prescaler = ms/31.25 * PSC32;
-    TIM16->PSC |= (prescaler << 0);
+    // Set new ARR value
+    uint32_t reload;
+    reload = ms/31.25 * ARR32;
+    TIM16->ARR |= (reload << 0);
 }
 
 
@@ -84,9 +88,10 @@ int main(void) {
     initTIM2(tim2);
     initTIM16(tim16);
 
-    tim2->ARR &= 0;
-    TIM2->ARR = (4000 << 16);
-    TIM16->ARR = (4000 << 0);  
+    tim2->PSC &= 0;
+    TIM2->PSC = (625 << 0);
+    tim16->PSC &= 0;
+    TIM16->PSC = (8 << 0);  
     TIM2->DIER |= (1 << 6);
 
     // Set initial pitch to 0
