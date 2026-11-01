@@ -15,7 +15,7 @@
 
 #define PSC32 1250 // Prescale value for 32 ms duration
 #define PSC200 50 // Prescale value for 200 Hz frequency
-#define OUTPUT_PIN 5 // PB5
+#define OUTPUT_PIN 5 // PA5 for TIM2_CH1
 
 void setPitch(int pitch) {
     // Set new prescaler value
@@ -69,11 +69,14 @@ void delay_millis(uint32_t ms) {
 
 int main(void) {
 
-    // Enable clock for GPIOB
-    RCC->AHB2ENR |= (1 << 1);
+    // Enable clock for GPIOA
+    RCC->AHB2ENR |= (1 << 0);
 
-    // Set OUTPUT_PIN as output
-    pinMode(OUTPUT_PIN, GPIO_OUTPUT);
+    // Set OUTPUT_PIN as alternate function for TIM PWM
+    pinMode(OUTPUT_PIN, GPIO_ALT);
+    // Set alternate function to TIM2_CH1
+    GPIO->AFRL &= ~(0b0000 << 20);
+    GPIO->AFRL |= (0b0001 << 20);
 
     // initialize timers
     TIM2_TypeDef *tim2 = TIM2;
@@ -83,7 +86,8 @@ int main(void) {
 
     tim2->ARR &= 0;
     TIM2->ARR = (4000 << 16);
-    TIM16->ARR = (4000 << 0);   
+    TIM16->ARR = (4000 << 0);  
+    TIM2->DIER |= (1 << 6);
 
     // Set initial pitch to 0
     setPitch(0);
@@ -98,7 +102,7 @@ int main(void) {
     // clear SR 
     TIM16->SR &= 0;
 
-    // Start song
+    //// Start song
     for (uint32_t i = 0; i < 109; i++) {
 
         int pitch = notes[i][0];
@@ -112,11 +116,5 @@ int main(void) {
 
         // Start the clock for the duration
         delay_millis(duration);
-
-        while(((TIM16->SR >> 0) & 1) == 0){
-          togglePin(OUTPUT_PIN);
-        }
-  
     }
-
 }
