@@ -13,15 +13,14 @@
 #include <stdint.h>
 #include <math.h>
 
-#define PSC32 1250; // Prescale value for 32 ms duration
-#define PSC200 50; // Prescale value for 200 Hz frequency
-#define OUTPUT_PIN          6
+#define PSC32 1250 // Prescale value for 32 ms duration
+#define PSC200 50 // Prescale value for 200 Hz frequency
+#define OUTPUT_PIN 5 // PB5
 
 void setPitch(int pitch) {
     // Set new prescaler value
     uint32_t prescaler = ((double) pitch)/200.0 * PSC200;
     TIM2->PSC |= (prescaler << 0);
-    TIM2->ARR |= (prescaler << 16);
 }
 
 void PWM(void) {
@@ -65,37 +64,40 @@ void delay_millis(uint32_t ms) {
     uint32_t prescaler;
     prescaler = ms/31.25 * PSC32;
     TIM16->PSC |= (prescaler << 0);
-    TIM16->ARR |= (prescaler << 16);
 }
 
 
 int main(void) {
 
-    // Enable clock for GPIOA
-    RCC->AHB2ENR |= (1 << 0);
+    // Enable clock for GPIOB
+    RCC->AHB2ENR |= (1 << 1);
 
     // Set OUTPUT_PIN as output
     pinMode(OUTPUT_PIN, GPIO_OUTPUT);
 
     // initialize timers
-    initTIM2();
-    initTIM16();
+    TIM2_TypeDef *tim2 = TIM2;
+    TIM16_TypeDef *tim16 = TIM16;
+    initTIM2(tim2);
+    initTIM16(tim16);
 
-    // Enable UIF 
+    tim2->ARR &= 0;
+    TIM2->ARR = (4000 << 16);
+    TIM16->ARR = (4000 << 0);   
+
+    // Set initial pitch to 0
+    setPitch(0);
+
+    delay_millis(10);
+
+    // Start PWM for TIM2
+    PWM();
+    
+    // UIF Remapping
     TIM16->CR1 |= (1 << 11);
     // clear SR 
     TIM16->SR &= 0;
 
-    TIM2->ARR = 0;
-
-    // Set initial pitch to 0
-    //setPitch(0);
-
-    //delay_millis(10);
-
-    // Start PWM for TIM2
-    PWM();
-  
     // Start song
     for (uint32_t i = 0; i < 109; i++) {
 
@@ -105,13 +107,13 @@ int main(void) {
         // clear UIF 
         TIM16->SR &= ~(1 << 0);
 
+        // Set the pitch
+        setPitch(pitch);
+
+        // Start the clock for the duration
+        delay_millis(duration);
+
         while(((TIM16->SR >> 0) & 1) == 0){
-          // Set the pitch
-          setPitch(pitch);
-
-          // Start the clock for the duration
-          delay_millis(duration);
-
           togglePin(OUTPUT_PIN);
         }
   
