@@ -17,7 +17,12 @@
 #define ARR200 50000.0 // ARR value for 200 Hz frequency
 #define OUTPUT_PIN 5 // PA5 for TIM2_CH1
 
+volatile uint32_t reloadD;
+volatile uint32_t reloadP;
+
 void PWM(void) {
+    // Set duty cycle
+    TIM2->CCR1 |= reloadP / 2;
 
     // Set OCxM bit to PWM mode 1
     TIM2->CCMR1 |= (0b0110 << 4);
@@ -40,16 +45,17 @@ void setPitch(int pitch) {
     if (pitch == 0) {
       TIM2->ARR &= 0;
     } else {
-      uint32_t reload = 200.0/((double) pitch) * ARR200;
-      TIM2->ARR = reload;
+      reloadP = 200.0/((double) pitch) * ARR200;
+      TIM2->ARR = reloadP;
     }
+    TIM2->CCR1 |= reloadP / 2;
 }
 
 void delay_millis(uint32_t ms) {
     // Set new ARR value
-    uint32_t reload;
-    reload = ms/31.25 * ARR32;
-    TIM16->ARR = reload;
+    while(((TIM16->SR >> 0) & 1) == 0);
+    reloadD = ms/31.25 * ARR32;
+    TIM16->ARR = reloadD;
 }
 
 
@@ -61,7 +67,7 @@ int main(void) {
     // Set OUTPUT_PIN as alternate function for TIM PWM
     pinMode(OUTPUT_PIN, GPIO_ALT);
     // Set alternate function to TIM2_CH1
-    GPIO->AFRL &= ~(0b0000 << 20);
+    GPIO->AFRL &= ~(0b1111 << 20);
     GPIO->AFRL |= (0b0001 << 20);
 
     // initialize timers
