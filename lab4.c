@@ -21,96 +21,131 @@ volatile uint32_t reloadD;
 volatile uint32_t reloadP;
 
 void PWM(void) {
-    // Set duty cycle
-    TIM2->CCR1 |= reloadP / 2;
 
     // Set OCxM bit to PWM mode 1
+    TIM2->CCMR1 &= ~(0b1111 << 4);
     TIM2->CCMR1 |= (0b0110 << 4);
 
     // Set OCxPE
     TIM2->CCMR1 |= (1 << 3);
 
-    // Set UG bit
-    TIM2->EGR |= (1 << 0);
-
-    // Set OC polarity as active low with CCxP bit
-    TIM2->CCER |= (1 << 1);
+    // Set OC polarity as active high with CCxP bit
+    TIM2->CCER &= ~(1 << 1);
 
     // Enable OCx output with CCxE bit
     TIM2->CCER |= (1 << 0);
+
+    // Enable auto-reload preload
+    TIM2->CR1 |= (1 << 7);
+
+    // Set UG bit
+    TIM2->EGR |= (1 << 0);
+    
+    // Start timer
+    TIM2->CR1 |= (1 << 0);
+
 }
 
 void setPitch(int pitch) {
-    // Set new ARR value
+
     if (pitch == 0) {
-      TIM2->ARR &= 0;
-    } else {
-      reloadP = 200.0/((double) pitch) * ARR200;
-      TIM2->ARR = reloadP;
+        // Silence
+        TIM2->CCR1 = 0;
+        return;
     }
-    TIM2->CCR1 |= reloadP / 2;
+
+    // Timer counter frequency = 10 MHz
+    // ARR = (timer frequency / pitch) - 1
+    reloadP = (10000000UL / pitch) - 1;
+
+    // Set frequency
+    TIM2->ARR = reloadP;
+
+    // 50% duty cycle
+    TIM2->CCR1 = (reloadP + 1) / 2;
+
+    // Immediately load updated registers
+    TIM2->EGR |= (1 << 0);
 }
 
 void delay_millis(uint32_t ms) {
+    if (ms == 0) return;
+
+    // Stop timer
+    TIM16->CR1 &= ~(1 << 0);
+    // Reset counter
+    TIM16->CNT = 0;
     // Set new ARR value
-    while(((TIM16->SR >> 0) & 1) == 0);
-    reloadD = ms/31.25 * ARR32;
-    TIM16->ARR = reloadD;
+    TIM16->ARR = (10 * ms) - 1;
+    // Generate update event
+    TIM16->EGR |= (1 << 0);
+      // Clear update flag
+    TIM16->SR &= ~(1 << 0);
+    // Start timer
+    TIM16->CR1 |= (1 << 0);
+    // Wait for update event
+    while (!(TIM16->SR & (1 << 0)));
+    // Stop timer
+    TIM16->CR1 &= ~(1 << 0);
+    // Clear update flag
+    TIM16->SR &= ~(1 << 0);
 }
 
 
 int main(void) {
 
-    // Enable clock for GPIOA
+    // Configure system clock to 80 MHz
+    configureFlash();
+    configureClock();
+
+    // Enable GPIOA clock
     RCC->AHB2ENR |= (1 << 0);
 
-    // Set OUTPUT_PIN as alternate function for TIM PWM
+    // Configure PA5 as alternate function
     pinMode(OUTPUT_PIN, GPIO_ALT);
-    // Set alternate function to TIM2_CH1
+
+    // PA5 alternate function 1 = TIM2_CH1
     GPIO->AFRL &= ~(0b1111 << 20);
     GPIO->AFRL |= (0b0001 << 20);
 
-    // initialize timers
-    TIM2_TypeDef *tim2 = TIM2;
-    TIM16_TypeDef *tim16 = TIM16;
-    initTIM2(tim2);
-    initTIM16(tim16);
+    // Initialize timers
+    initTIM2(TIM2);
+    initTIM16(TIM16);
 
-    tim2->PSC &= 0;
-    TIM2->PSC = (625 << 0);
-    tim16->PSC &= 0;
-    TIM16->PSC = (8 << 0);  
-    TIM2->DIER |= (1 << 6);
+    // TIM2: 80 MHz / 8 = 10 MHz
+    TIM2->PSC = 7;
+    TIM2->ARR = 9999;
+    TIM2->CNT = 0;
 
-    // Set initial pitch to 0
+    // Load prescaler and ARR
+    TIM2->EGR |= (1 << 0);
+    TIM2->SR &= ~(1 << 0);
+
+    // Start PWM configuration
     setPitch(0);
+    PWM();
 
+    // Small initial delay
     delay_millis(10);
 
-    // Start PWM for TIM2
-    PWM();
-    
-    // UIF Remapping
-    TIM16->CR1 |= (1 << 11);
-    // clear SR 
-    TIM16->SR &= 0;
+    // Play song
+    uint32_t numNotes = sizeof(notes) / sizeof(notes[0]);
 
-    //// Start song
-    for (uint32_t i = 0; i < 109; i++) {
+    for (uint32_t i = 0; i < numNotes; i++) {
+
         int pitch = notes[i][0];
         int duration = notes[i][1];
 
-        // clear UIF 
-        TIM16->SR &= ~(1 << 0);
-
-        // Set the pitch
+        // Set frequency
         setPitch(pitch);
 
-        // Start the clock for the duration
+        // Wait for duration
         delay_millis(duration);
-        // while(((TIM16->SR >>0) & 1) != 1);
-        
-        // Set UG bit
-        TIM2->EGR |= (1 << 0);
+    }
+
+    // End song
+    setPitch(0);
+
+    while (1) {
     }
 }

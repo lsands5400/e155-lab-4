@@ -32,7 +32,7 @@ void configurePLL() {
     // Set PLLM
     // PLLCFGR[6:4]-> 1 <= PLLM <= 8
     RCC->PLLCFGR &= ~(0b111 << 4);  // Clear all bits
-    RCC->PLLCFGR |= (0b010 << 4);
+    RCC->PLLCFGR |= (0b001 << 4);
 
     // Set PLLR
     // PLLCFGR[26:25]-> PLLR = 2(00), 4(01), 6(10), 8(11)
@@ -45,14 +45,15 @@ void configurePLL() {
     RCC->CR |= (1 << 24);
     
     // Wait until PLL is locked
-    while ((RCC->CR >> 25) & 1 != 1);
+    while (((RCC->CR >> 25) & 1) != 1);
 }
 
-void configureClock(){
+void configureClock(void) {
     // Configure and turn on PLL
     configurePLL();
 
     // Select PLL as clock source
+    RCC->CFGR &= ~(0b11 << 0);
     RCC->CFGR |= (0b11 << 0);
     while(!((RCC->CFGR >> 2) & 0b11));
 }

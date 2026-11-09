@@ -9,22 +9,27 @@
 // Base addresses for TIM2 ports
 #define TIM2_BASE (0x400003FF)
 
-void initTIM2(TIM2_TypeDef * tim) {
+void initTIM2(TIM2_TypeDef *tim) {
 
-    // Turn on bus for timer from RCC
-    RCC->APB1ENR1 |= (1 << 0); // Enable TIM2
-    
-    // Disable slave mode
-    tim->SMCR &= ~(1<<0);
-    tim->SMCR &= ~(1<<1);
-    tim->SMCR &= ~(1<<2);
+    // Enable TIM2 clock
+    RCC->APB1ENR1 |= (1 << 0);
 
-    // Configure counter
+    // Disable timer
+    tim->CR1 &= ~(1 << 0);
 
-    // Enable proper registers
-    // Prescaler
-    // Enable Auto-reload
-    tim->CR1 |= (1<<7);
-    // Enable Counter
-    tim->CR1 |= (1<<0);
+    // Enable ARR preload
+    tim->CR1 |= (1 << 7);
+
+    // Configure PWM prescaler
+    tim->PSC = 7;
+
+    // Initialize ARR and counter
+    tim->ARR = 9999;
+    tim->CNT = 0;
+
+    // Generate update event
+    tim->EGR |= (1 << 0);
+
+    // Clear status register
+    tim->SR = 0;
 }

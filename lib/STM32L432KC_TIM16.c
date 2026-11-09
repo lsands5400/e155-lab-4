@@ -14,11 +14,19 @@ void initTIM16(TIM16_TypeDef * tim) {
     // Turn on bus for timer from RCC
     RCC->APB2ENR |= (1 << 17); // Enable TIM16
     // Configure counter
-
+    // Make sure timer is stopped
+    tim->CR1 &= ~(1 << 0);
     // Enable proper registers
     // Prescaler
     // Enable Auto-reload
     tim->CR1 |= (1 << 7);
-    // Enable Counter
-    tim->CR1 |= (1 << 0);
+    // Set prescaler for 10 kHz timer frequency
+    tim->PSC = 7999;
+    // Initialize ARR
+    tim->ARR = 999;
+    // Generate update event to load PSC and ARR
+    tim->EGR |= (1 << 0);
+    // Clear update flag
+    tim->SR &= ~(1 << 0);
+
 }
